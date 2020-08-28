@@ -8,10 +8,22 @@ export class Film extends Document {
   @Prop({ required: true })
   name: string;
 
+  @Prop({ required: true })
+  coverImage: string;
+
+  @Prop({ required: true })
+  videoSource: string;
+
+  @Prop({ required: true })
+  description: string;
+
+  @Prop({ required: true, type: [String] })
+  comments: string[];
+
   @Prop({ required: true, type: [String] })
   director: string[];
 
-  @Prop([{ ref: Genre.name, type: ObjectId }])
+  @Prop([{ ref: Genre.name, type: [ObjectId] }])
   genre: Array<Genre>; 
 
   @Prop({ required: true })

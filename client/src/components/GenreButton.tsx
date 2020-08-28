@@ -3,17 +3,23 @@ import styled from 'styled-components';
 
 interface GenreButtonProps {
   value: string;
+  favorites?: boolean;
 }
 
-export const GenreButton: FC<GenreButtonProps> = ({ value }) => {
+export const GenreButton: FC<GenreButtonProps> = ({ value, favorites }) => {
   
   return (
-    <Button type='button' value={value} />
+    <>
+      {favorites
+        ? <Button type='button' value={value} favorites />
+        : <Button type='button' value={value} />
+      }
+    </>
   )
 }
 
 const Button = styled.input`
-  background-color: #f7dfc6;
+  background-color: ${props => props.favorites ? "#97debb" : "#f7dfc6"}; 
   border: 2px solid #fc8000;
   border-radius: 5px;
   height: 40px;
