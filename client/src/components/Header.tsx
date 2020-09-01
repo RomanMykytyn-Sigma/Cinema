@@ -47,8 +47,10 @@ export const Header: FC<HeaderProps> = ({ userName, setUserName, setListFavorite
   }
 
   const exitHandler = () => {
-    fetch('/users/exit')
+    fetch('/users/exit', {redirect: "follow"})
       .then((response) => {
+        console.log(response);
+        
         if (response.status === 200) {
          setUserName('');
         }

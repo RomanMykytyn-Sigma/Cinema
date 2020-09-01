@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
+import { SetUserFavoritesDto } from './dto/set-user-favorites.dto';
 import { Response, Request } from 'express';
 import { AuthService } from '../auth/auth.service'
 import bcrypt from 'bcrypt';
@@ -38,6 +39,18 @@ export class UsersService {
     } else {
       res.status(401).end();
     }
+    return;
+  }
+
+  async setFavorites(res: Response, favoritesData: SetUserFavoritesDto): Promise<User | undefined> {
+    const { userName, favorites } = favoritesData;
+    this.userModel.findOneAndUpdate({login: userName}, {favorites: favorites}, (err) => {
+      if (err) {
+        res.status(403).end();
+        return
+      }
+      res.status(201).end();
+    });
     return;
   }
 

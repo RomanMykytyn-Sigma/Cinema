@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Header } from './components/Header';
-import { FilmCard } from './components/filmCard';
+import { FilmCard } from './components/FilmCard';
 import { GenreButton } from './components/GenreButton';
 import styled from 'styled-components';
+import { log } from 'util';
 
 const App: React = () => {
   const [userName, setUserName] = useState('');
@@ -29,7 +30,48 @@ const App: React = () => {
         }
         
       })
-  }, [])
+  }, []);
+
+  useEffect(() => {
+    if (!userName) {
+      setListFavorites([]);
+    }
+  }, [userName]);
+
+  const checkIsFavorite = (filmId: string) => {
+    if (listFavorites.includes(filmId)) {
+      return true;
+    } 
+    return false;
+  };
+
+  const setFavorite = (filmId: string) => {
+    if (!userName) {
+      alert('Only authorized users can set favorites! ');
+      return;
+    }
+    let favorites = [...listFavorites];
+    const elem = favorites.indexOf(filmId);
+    if (elem >= 0) {
+      favorites.splice(elem, 1)
+    } else{
+      favorites.push(filmId)
+    }
+    fetch('/users/setFavorites', {method: 'POST',
+                                  headers: {'Content-Type': 'application/json'},
+                                  body: JSON.stringify({userName, favorites})
+    })
+      .then((response) => {
+        console.log(response)
+        if (response.status === 201) {
+          console.log(listFavorites);
+          
+          setListFavorites(favorites);
+        } else {
+          console.error('Some error occured')
+        }
+      })
+  };
 
   return (
     <>
@@ -48,7 +90,7 @@ const App: React = () => {
         </Aside>
         <MainField>
           { listFilms.map(el => 
-                <FilmCard key={el._id} film={el}/>
+                <FilmCard key={el._id} film={el} isFavorite={checkIsFavorite(el._id)} setFavorite={setFavorite} />
             )
           }
         </MainField>

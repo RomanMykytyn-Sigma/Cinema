@@ -1,5 +1,6 @@
 import { Controller, Post, Body, Res, Req, Get } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
+import { SetUserFavoritesDto } from './dto/set-user-favorites.dto';
 import { UsersService } from './users.service';
 import { Response, Request } from 'express';
 
@@ -15,6 +16,11 @@ export class UsersController {
   @Post('login')
   async login(@Body() createUserDto: CreateUserDto, @Res() res: Response, @Req() req: Request) {
     this.usersService.login(req, res, createUserDto);
+  }
+
+  @Post('setFavorites')
+  async setFavorites(@Body() favoritesData: SetUserFavoritesDto, @Res() res: Response) {
+    this.usersService.setFavorites(res, favoritesData);
   }
 
   @Get('exit')

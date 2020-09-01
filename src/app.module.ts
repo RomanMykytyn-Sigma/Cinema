@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { Genre, GenreSchema } from './schemas/genre.schema';
 import { Film, FilmSchema } from './schemas/film.schema';
+import { User, UserSchema } from './schemas/user.schema';
 import { FilmsModule } from './films/films.module';
 
 @Module({
@@ -18,6 +19,7 @@ import { FilmsModule } from './films/films.module';
     MongooseModule.forRoot('mongodb+srv://roman:20051989@cluster0-vnual.mongodb.net/Cinema?retryWrites=true&w=majority'),
     MongooseModule.forFeature([{ name: Genre.name, schema: GenreSchema }]),
     MongooseModule.forFeature([{ name: Film.name, schema: FilmSchema }]),
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     AuthModule,
     UsersModule,
     FilmsModule,

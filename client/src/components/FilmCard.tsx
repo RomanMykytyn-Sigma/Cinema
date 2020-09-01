@@ -2,9 +2,11 @@ import React, { FC } from 'react';
 import styled from 'styled-components';
 import StarRating from 'react-svg-star-rating'
 import date from 'date-and-time';
+import { FavoriteButton } from './FavoriteButton';
 
 interface FilmCardProps {
   film: {
+    _id: string;
     name: string,
     coverImage: string;
     description: string;
@@ -15,26 +17,41 @@ interface FilmCardProps {
       name: string
     }[],
     reliseDate: String;
-  }
+    rating: Array<number>;
+  };
+  isFavorite: boolean;
+  setFavorite: Function;
 }
 
-export const FilmCard: FC<FilmCardProps> = ({ film }) => {
-  const { name, coverImage, description, director, duration, genre, reliseDate  } = film;
+export const FilmCard: FC<FilmCardProps> = ({ film, isFavorite, setFavorite }) => {
+  const { name, coverImage, description, director, duration, genre, reliseDate, rating, _id  } = film;
   const relised = date.format(new Date(reliseDate), 'DD/MM/YYYY'); 
-  console.log(name);
   
+  const getRating = (listGrades: Array<number>) => {
+    const averageRating = listGrades.reduce((a, b) => a + b, 0) / listGrades.length;
+    const roundRating = (Math.round(averageRating * 2) / 2).toFixed(1);
+    return Number(roundRating);
+  }
   
   return (
     <Wrapper>
 
       <Chapter>
         {name}
-        <StarRating size={20} isHalfRating />
+        <StarRating size={20} 
+                    isHalfRating 
+                    initialRating={getRating(rating)} />
       </Chapter>
       
       <LeftSide>
-        <Image width='175' height='275' src={coverImage} />
-        <PlayButton type='button' value='Play' />
+        <Image width='175' 
+               height='275' 
+               src={coverImage} />
+        <PlayButton type='button' 
+                    value='Play' />
+        <FavoriteButton isFavorite={isFavorite} 
+                        setFavorite={setFavorite}
+                        id={_id} />
       </LeftSide>
 
       <RightSide>
@@ -82,6 +99,7 @@ const LeftSide = styled.div`
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
+  position: relative;
 `;
 
 const RightSide = styled.div`
