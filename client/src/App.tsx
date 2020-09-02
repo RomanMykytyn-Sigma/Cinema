@@ -3,33 +3,28 @@ import ReactDOM from 'react-dom';
 import { Header } from './components/Header';
 import { FilmCard } from './components/FilmCard';
 import { GenreButton } from './components/GenreButton';
+import CinemaGateway from './gateways/CinemaGateway';
+import UserGateway from './gateways/UsersGateway';
 import styled from 'styled-components';
-import { log } from 'util';
 
 const App: React = () => {
   const [userName, setUserName] = useState('');
   const [listGenres, setListGenres] = useState([]);
   const [listFavorites, setListFavorites] = useState([]);
   const [listFilms, setListFilms] = useState([]);
+  const cinemaGateway = CinemaGateway();
+  const userGateway = UserGateway();
 
   useEffect(() => {
-    fetch('/getData')
-      .then((response) => {
-        if (response.status === 200) {
-         return response.json();
-        }
-      })
-      .then((data) => {
-        console.log(data);
-        
-        setListGenres(data.listGenres);
-        setListFilms(data.listFilms);
-        if (data.user.login) {
-          setUserName(data.user.login);
-          setListFavorites(data.user.favorites);
-        }
-        
-      })
+    const fetchApi = async () => {
+      const data = await cinemaGateway.getData(); 
+      setListGenres(data.listGenres);
+      setListFilms(data.listFilms);
+      if (data.user.login) {
+        setUserName(data.user.login);
+        setListFavorites(data.user.favorites);
+    }}
+    fetchApi();
   }, []);
 
   useEffect(() => {
@@ -45,7 +40,7 @@ const App: React = () => {
     return false;
   };
 
-  const setFavorite = (filmId: string) => {
+  const setFavorite = async (filmId: string) => {
     if (!userName) {
       alert('Only authorized users can set favorites! ');
       return;
@@ -57,20 +52,12 @@ const App: React = () => {
     } else{
       favorites.push(filmId)
     }
-    fetch('/users/setFavorites', {method: 'POST',
-                                  headers: {'Content-Type': 'application/json'},
-                                  body: JSON.stringify({userName, favorites})
-    })
-      .then((response) => {
-        console.log(response)
-        if (response.status === 201) {
-          console.log(listFavorites);
-          
-          setListFavorites(favorites);
-        } else {
-          console.error('Some error occured')
-        }
-      })
+    const response = await userGateway.setFavorites(userName, favorites);
+    if (response && response.status === 201) {
+      setListFavorites(favorites);
+    } else {
+      alert('Some error occured')
+    }
   };
 
   return (

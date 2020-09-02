@@ -1,5 +1,6 @@
 import React, { useState, FC } from 'react';
 import styled from 'styled-components';
+import UserGateway from '../gateways/UsersGateway';
 
 interface HeaderProps {
   userName: string;
@@ -10,6 +11,7 @@ interface HeaderProps {
 export const Header: FC<HeaderProps> = ({ userName, setUserName, setListFavorites }) => {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
+  const userGateway = UserGateway();
 
   const onChangeHandler = (e) => {
     if (e.target.type === 'text') {
@@ -19,42 +21,27 @@ export const Header: FC<HeaderProps> = ({ userName, setUserName, setListFavorite
     }
   };
 
-  const logInNewHandler = (e) => {
+  const logInNewHandler = async (e) => {
     if (!login || !password) {
       alert('Login or(and) password is empty!\nPlease, enter theirs.');
       return;
     }
-    const url = e.target.value === 'Log In' ? '/users/login' : '/users/create';
     const alertMsg = e.target.value === 'Log In' ? 'Wrong login or(and) password!' 
                                                  : 'This login already exist!!!\nPlease, try another login.';
-    fetch(url, {method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({login, password})
-    })
-      .then((response) => {
-        if (response.status !== 201) {
-          alert(alertMsg);
-          return;
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (data) {
-          setUserName(data.user.login);
-          setListFavorites(data.user.favorites);
-        }         
-      })
+    const data = await userGateway.createOrLoginUser(e.target.value, login, password);
+    if (!data.error) {
+      setUserName(data.user.login);
+      setListFavorites(data.user.favorites);
+    } else{
+      alert(alertMsg);
+    }         
   }
 
-  const exitHandler = () => {
-    fetch('/users/exit', {redirect: "follow"})
-      .then((response) => {
-        console.log(response);
-        
-        if (response.status === 200) {
-         setUserName('');
-        }
-      })
+  const logoutHandler = async () => {
+    const response = await userGateway.userLogout();
+    if (response && response.status === 200) {
+      setUserName('');
+    }   
   }
 
   return (
@@ -73,7 +60,7 @@ export const Header: FC<HeaderProps> = ({ userName, setUserName, setListFavorite
               <Button type='button' value='New User' onClick={logInNewHandler} />
             </div>
           : <div>
-              <Button type='button' value='Exit' onClick={exitHandler} />
+              <Button type='button' value='LogOut' onClick={logoutHandler} />
             </div>
       } 
     </Wrapper>

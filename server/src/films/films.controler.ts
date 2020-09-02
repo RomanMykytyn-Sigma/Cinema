@@ -7,7 +7,8 @@ export class FilmsController {
   constructor(private readonly filmsService: FilmsService) {}
 
   @Get('getAll')
-  getAll(@Req() req: Request, @Res() res: Response) {
-    return this.filmsService.getAll(req, res);
+  async getAll() {
+    const listFilms = await this.filmsService.getAll();
+    return { listFilms };
   }
 }

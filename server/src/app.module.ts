@@ -10,13 +10,15 @@ import { Genre, GenreSchema } from './schemas/genre.schema';
 import { Film, FilmSchema } from './schemas/film.schema';
 import { User, UserSchema } from './schemas/user.schema';
 import { FilmsModule } from './films/films.module';
+import dotenv from 'dotenv';
 
+dotenv.config();
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'client'),
+      rootPath: join(__dirname, '../..', 'client'),
     }),
-    MongooseModule.forRoot('mongodb+srv://roman:20051989@cluster0-vnual.mongodb.net/Cinema?retryWrites=true&w=majority'),
+    MongooseModule.forRoot(process.env.DB_CONNECT),
     MongooseModule.forFeature([{ name: Genre.name, schema: GenreSchema }]),
     MongooseModule.forFeature([{ name: Film.name, schema: FilmSchema }]),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),

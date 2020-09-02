@@ -3,22 +3,10 @@ import styled from 'styled-components';
 import StarRating from 'react-svg-star-rating'
 import date from 'date-and-time';
 import { FavoriteButton } from './FavoriteButton';
+import { Film } from '../types';
 
 interface FilmCardProps {
-  film: {
-    _id: string;
-    name: string,
-    coverImage: string;
-    description: string;
-    director: Array<string>;
-    duration: number;
-    genre: {
-      _id: string,
-      name: string
-    }[],
-    reliseDate: String;
-    rating: Array<number>;
-  };
+  film: Film;
   isFavorite: boolean;
   setFavorite: Function;
 }
@@ -29,8 +17,8 @@ export const FilmCard: FC<FilmCardProps> = ({ film, isFavorite, setFavorite }) =
   
   const getRating = (listGrades: Array<number>) => {
     const averageRating = listGrades.reduce((a, b) => a + b, 0) / listGrades.length;
-    const roundRating = (Math.round(averageRating * 2) / 2).toFixed(1);
-    return Number(roundRating);
+    const roundRating = (Math.round(averageRating * 2) / 2);
+    return roundRating;
   }
   
   return (

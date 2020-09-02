@@ -5,6 +5,7 @@ import session from 'express-session';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const PORT = process.env.PORT || 3000;
   app.use(session({
     secret: 'blablabla', // to sign session id
     resave: false, // will default to false in near future: https://github.com/expressjs/session#resave
@@ -17,6 +18,6 @@ async function bootstrap() {
   }));
   app.use(passport.initialize());
   app.use(passport.session());
-  await app.listen(3000);
+  await app.listen(PORT);
 }
 bootstrap();
