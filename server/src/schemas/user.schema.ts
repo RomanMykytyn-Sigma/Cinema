@@ -16,7 +16,7 @@ export class User extends Document {
   favorites: Array<string>; 
 
   @Prop([{ ref: Film.name, type: ObjectId }])
-  ratedFilms: Array<Film>; 
+  ratedFilms: Array<string>; 
 
 }
 

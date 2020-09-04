@@ -1,45 +1,75 @@
-import React, { FC } from 'react';
+import React, { FC, useState, useContext } from 'react';
 import styled from 'styled-components';
-import StarRating from 'react-svg-star-rating'
+import StarRating from 'react-star-ratings'
 import date from 'date-and-time';
 import { FavoriteButton } from './FavoriteButton';
 import { Film } from '../types';
+import Gateway from '../gateway';
+import { UserContext } from '../context';
+import { Link } from "react-router-dom";
 
 interface FilmCardProps {
   film: Film;
-  isFavorite: boolean;
-  setFavorite: Function;
+  setActiveFilm: Function;
 }
 
-export const FilmCard: FC<FilmCardProps> = ({ film, isFavorite, setFavorite }) => {
+export const FilmCard: FC<FilmCardProps> = ({ film, setActiveFilm }) => {
   const { name, coverImage, description, director, duration, genre, reliseDate, rating, _id  } = film;
-  const relised = date.format(new Date(reliseDate), 'DD/MM/YYYY'); 
+  const [averageRating, setAverageRating] = useState(getAverageRating(rating));
+  const { user } = useContext(UserContext);
+  const relised = date.format(new Date(reliseDate), 'DD/MM/YYYY');
+  const gateway = Gateway(); 
   
-  const getRating = (listGrades: Array<number>) => {
-    const averageRating = listGrades.reduce((a, b) => a + b, 0) / listGrades.length;
-    const roundRating = (Math.round(averageRating * 2) / 2);
-    return roundRating;
+  function getAverageRating(listGrades: Array<number>) {
+    return listGrades.reduce((a, b) => a + b, 0) / listGrades.length;
   }
+
+  const changeRatingHandler = async (grade: number) => {
+    if (!user.login) {
+      alert('Only authorized users can vote!');
+      return;
+    }
+    if (user.ratedFilms.includes(_id)) {
+      alert("You've already voted for this movie!");
+      return;
+    }
+    const response = await gateway.addVote(user.login, _id, grade);
+    if (response.error) {
+      alert(response.error);
+      return;
+    }
+    rating.push(grade);
+    user.ratedFilms.push(_id);
+    setAverageRating(getAverageRating(rating));
+  };
+
+  const clickHandler = () => {
+    setActiveFilm(film);
+  };
   
   return (
     <Wrapper>
 
       <Chapter>
         {name}
-        <StarRating size={20} 
-                    isHalfRating 
-                    initialRating={getRating(rating)} />
+        <StarRating starDimension='20px'
+                    starSpacing='2px' 
+                    rating={averageRating}
+                    changeRating={changeRatingHandler}
+                    starRatedColor='yellow'
+                    starHoverColor='yellow' />
       </Chapter>
       
       <LeftSide>
         <Image width='175' 
                height='275' 
                src={coverImage} />
-        <PlayButton type='button' 
-                    value='Play' />
-        <FavoriteButton isFavorite={isFavorite} 
-                        setFavorite={setFavorite}
-                        id={_id} />
+        <Link to='/watch'>
+          <PlayButton type='button' 
+                      value='Play'
+                      onClick={clickHandler} />
+        </Link>
+        <FavoriteButton filmId={_id} />
       </LeftSide>
 
       <RightSide>

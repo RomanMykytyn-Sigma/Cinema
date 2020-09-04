@@ -24,7 +24,7 @@ export class Film extends Document {
   director: string[];
 
   @Prop([{ ref: Genre.name, type: [ObjectId] }])
-  genre: Array<Genre>; 
+  genre: Array<string>; 
 
   @Prop({ required: true })
   reliseDate: Date;
@@ -34,6 +34,7 @@ export class Film extends Document {
 
   @Prop([Number])
   rating: number[];
+  
 }
 
 export const FilmSchema = SchemaFactory.createForClass(Film);

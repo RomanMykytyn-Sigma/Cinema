@@ -22,8 +22,8 @@ export class UsersService {
     return this.authService.validateUser(login, password);
   }
 
-  async setFavorites(userName: string): Promise<User | undefined> {
-    return this.userModel.findOne({login: userName});
+  async findOne(userName: string): Promise<User | undefined> {
+    return this.userModel.findOne({login: userName}).exec();
   }
 
 }

@@ -1,17 +1,17 @@
-import React, { useState, FC } from 'react';
+import React, { useState, FC, useContext } from 'react';
 import styled from 'styled-components';
-import UserGateway from '../gateways/UsersGateway';
+import Gateway from '../gateway';
+import { UserContext } from '../context';
 
 interface HeaderProps {
-  userName: string;
-  setUserName: Function;
-  setListFavorites: Function;
+  
 }
 
-export const Header: FC<HeaderProps> = ({ userName, setUserName, setListFavorites }) => {
+export const Header: FC<HeaderProps> = ({  }) => {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
-  const userGateway = UserGateway();
+  const { user, setUser } = useContext(UserContext);
+  const userGateway = Gateway();
 
   const onChangeHandler = (e) => {
     if (e.target.type === 'text') {
@@ -30,29 +30,28 @@ export const Header: FC<HeaderProps> = ({ userName, setUserName, setListFavorite
                                                  : 'This login already exist!!!\nPlease, try another login.';
     const data = await userGateway.createOrLoginUser(e.target.value, login, password);
     if (!data.error) {
-      setUserName(data.user.login);
-      setListFavorites(data.user.favorites);
+      setUser(data.user);
     } else{
       alert(alertMsg);
     }         
   }
 
-  const logoutHandler = async () => {
+  const logOutHandler = async () => {
     const response = await userGateway.userLogout();
     if (response && response.status === 200) {
-      setUserName('');
+      setUser({});
     }   
   }
 
   return (
     <Wrapper>
       <p>
-        { userName 
-            ? `Welcome, ${userName}!`
+        { user.login 
+            ? `Welcome, ${user.login}!`
             : 'Hi, stranger. Please, join us.'
         }
       </p>
-      { !userName
+      { !user.login
           ? <div>     
               <Input type='text' onChange={onChangeHandler} placeholder='Login' />
               <Input type='password' onChange={onChangeHandler} placeholder='Password' />
@@ -60,7 +59,7 @@ export const Header: FC<HeaderProps> = ({ userName, setUserName, setListFavorite
               <Button type='button' value='New User' onClick={logInNewHandler} />
             </div>
           : <div>
-              <Button type='button' value='LogOut' onClick={logoutHandler} />
+              <Button type='button' value='LogOut' onClick={logOutHandler} />
             </div>
       } 
     </Wrapper>

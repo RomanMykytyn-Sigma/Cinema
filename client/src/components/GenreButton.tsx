@@ -3,24 +3,27 @@ import styled from 'styled-components';
 
 interface GenreButtonProps {
   value: string;
-  favorites?: boolean;
+  clickHandler: Function;
+  id: string;
+  isActive: boolean;
 }
 
-export const GenreButton: FC<GenreButtonProps> = ({ value, favorites }) => {
+export const GenreButton: FC<GenreButtonProps> = ({ value, clickHandler, id, isActive }) => {
+
+  const onClickHandler = () => {
+    clickHandler(id);
+  };
   
   return (
-    <>
-      {favorites
-        ? <Button type='button' value={value} favorites />
-        : <Button type='button' value={value} />
-      }
-    </>
+    <Button type='button' value={value} onClick={onClickHandler} isActive={isActive} />
   )
 }
 
 const Button = styled.input`
-  background-color: ${props => props.favorites ? "#97debb" : "#f7dfc6"}; 
-  border: 2px solid #fc8000;
+  background: ${props => props.isActive 
+                          ? "linear-gradient(#dedede, #f55353)" 
+                          : "linear-gradient(#dedede, #ffbb75)"};
+  border: 3px solid #fc8000;
   border-radius: 5px;
   height: 40px;
   width: 250px;
@@ -28,4 +31,5 @@ const Button = styled.input`
   font-size: 18px;
   cursor: pointer;
   font-weight: bold;
+  margin-bottom: 5px;
 `;

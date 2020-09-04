@@ -7,7 +7,19 @@ import { Model } from 'mongoose';
 export class FilmsService {
   constructor(@InjectModel(Film.name) private filmModel: Model<Film>) {}
 
-  async getAll() {
-    return this.filmModel.find({}).lean(true);
+  async findAllByGenres(genreFilter: Array<string>) {
+    return this.filmModel.find({ genre: { $in: genreFilter } }).populate('genre');
+  }
+
+  async findAllByFavorites(favorites: Array<string>) {
+    return this.filmModel.find({ _id: { $in: favorites } }).populate('genre');
+  }
+
+  async findAll() {
+    return this.filmModel.find({}).populate('genre');
+  }
+
+  async findOne(filmId: string) {
+    return this.filmModel.findById(filmId).exec();
   }
 }

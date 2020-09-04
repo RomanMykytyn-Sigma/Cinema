@@ -1,4 +1,4 @@
-export type Film  = {
+export type Film = {
   _id: string;
   name: string,
   coverImage: string;
@@ -11,4 +11,11 @@ export type Film  = {
   }[],
   reliseDate: String;
   rating: Array<number>;
+};
+
+export type User = {
+  _id: string;
+  login: string;
+  favorites: Array<string>;
+  ratedFilms: Array<string>;
 };

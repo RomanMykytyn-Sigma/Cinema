@@ -3,86 +3,98 @@ import ReactDOM from 'react-dom';
 import { Header } from './components/Header';
 import { FilmCard } from './components/FilmCard';
 import { GenreButton } from './components/GenreButton';
-import CinemaGateway from './gateways/CinemaGateway';
-import UserGateway from './gateways/UsersGateway';
+import Gateway from './gateway';
 import styled from 'styled-components';
+import { UserContext } from './context'
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import YouTube from 'react-youtube';
 
 const App: React = () => {
-  const [userName, setUserName] = useState('');
+  const [user, setUser] = useState({});
+  const [activeFilm, setActiveFilm] = useState({});
   const [listGenres, setListGenres] = useState([]);
-  const [listFavorites, setListFavorites] = useState([]);
   const [listFilms, setListFilms] = useState([]);
-  const cinemaGateway = CinemaGateway();
-  const userGateway = UserGateway();
+  const [genreFilter, setGenreFilter] = useState([]);
+  const gateway = Gateway();
 
   useEffect(() => {
     const fetchApi = async () => {
-      const data = await cinemaGateway.getData(); 
+      const data = await gateway.getData(); 
       setListGenres(data.listGenres);
       setListFilms(data.listFilms);
-      if (data.user.login) {
-        setUserName(data.user.login);
-        setListFavorites(data.user.favorites);
-    }}
+      setUser(data.user);
+    }
     fetchApi();
   }, []);
 
   useEffect(() => {
-    if (!userName) {
-      setListFavorites([]);
+    const fetchApi = async () => {
+      if (genreFilter.includes('My favorites')) {
+        const films = await gateway.getFilmsByFavorites(user.favorites); 
+        setListFilms(films);
+      } else {
+        const films = await gateway.getFilmsByGenres(genreFilter); 
+        setListFilms(films);
+      }
     }
-  }, [userName]);
+    fetchApi();
+  }, [genreFilter]);
 
-  const checkIsFavorite = (filmId: string) => {
-    if (listFavorites.includes(filmId)) {
-      return true;
-    } 
-    return false;
+  const changeFilterValue = (genreId) => {
+    if (genreFilter.includes(genreId)) {
+      setGenreFilter(genreFilter.filter(el => el !== genreId));
+    } else if (genreFilter.includes('My favorites')) {
+      setGenreFilter([genreId]);
+    } else {
+      setGenreFilter([...genreFilter, genreId]);
+    }
   };
 
-  const setFavorite = async (filmId: string) => {
-    if (!userName) {
-      alert('Only authorized users can set favorites! ');
-      return;
-    }
-    let favorites = [...listFavorites];
-    const elem = favorites.indexOf(filmId);
-    if (elem >= 0) {
-      favorites.splice(elem, 1)
-    } else{
-      favorites.push(filmId)
-    }
-    const response = await userGateway.setFavorites(userName, favorites);
-    if (response && response.status === 201) {
-      setListFavorites(favorites);
+  const clickFavotitesHandler = (genreId) => {
+    if (genreFilter.includes('My favorites')) {
+      setGenreFilter([]);
     } else {
-      alert('Some error occured')
+      setGenreFilter([genreId]);
     }
   };
 
   return (
-    <>
-      <Header userName={userName} 
-              setUserName={setUserName}
-              setListFavorites={setListFavorites} />
-      <FlexWrapper>
-        <Aside>
-          { userName &&
-            <GenreButton value={'My favorites'} favorites />
-          }
-          { listGenres.map(el => 
-              <GenreButton key={el._id} value={el.name}/>
-            )
-          }
-        </Aside>
-        <MainField>
-          { listFilms.map(el => 
-                <FilmCard key={el._id} film={el} isFavorite={checkIsFavorite(el._id)} setFavorite={setFavorite} />
-            )
-          }
-        </MainField>
-      </FlexWrapper>
-    </>
+    <Router>
+      <UserContext.Provider value={{user, setUser}}>
+        <Header />
+        <FlexWrapper>
+          <Aside>
+            { user.login &&
+              <GenreButton value={'My favorites'}
+                           id={'My favorites'}
+                           clickHandler={clickFavotitesHandler}
+                           isActive={genreFilter.includes('My favorites')} />
+            }
+            { listGenres.map(el => 
+                <GenreButton key={el._id} 
+                             value={el.name} 
+                             id={el._id}
+                             clickHandler={changeFilterValue}
+                             isActive={genreFilter.includes(el._id)} />
+              )
+            }
+          </Aside>
+          <MainField>
+            <Switch>
+              <Route path='/' exact>
+                { listFilms.map(el => 
+                    <FilmCard key={el._id} film={el} setActiveFilm={setActiveFilm} />
+                  )
+                }
+              </Route>
+              <Route path='/watch' exact>
+                <YouTube videoId={activeFilm.videoSource} opts={{height: '480', width: '720'}} onReady={this._onReady} />;
+              </Route>
+            </Switch>
+          </MainField>
+        </FlexWrapper>
+      </UserContext.Provider>
+    </Router>
   )
 }
 

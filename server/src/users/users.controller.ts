@@ -39,7 +39,7 @@ export class UsersController {
   @Post('setFavorites')
   async setFavorites(@Body() favoritesData: SetUserFavoritesDto, @Res() res: Response) {
     const { userName, favorites } = favoritesData;
-    const user = await this.usersService.setFavorites(userName);
+    const user = await this.usersService.findOne(userName);
     user.favorites = favorites;
     user.save( err => {
       if (err) {
@@ -51,7 +51,7 @@ export class UsersController {
   }
 
   @Get('logOut')
-  async exit(@Req() req: Request) {
+  async logOut(@Req() req: Request) {
     req.logout();
   }
 }
