@@ -2,6 +2,7 @@ import React, { FC, useContext, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { UserContext } from '../context';
 import Gateway from '../gateway';
+import { PopupMsg } from './PopupMsg';
 
 interface FavoriteButtonProps {
   filmId: string;
@@ -10,6 +11,8 @@ interface FavoriteButtonProps {
 export const FavoriteButton: FC<FavoriteButtonProps> = ({ filmId }) => {
   const {user, setUser} = useContext(UserContext);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isOpenPopup, setIsOpenPopup] = useState(false);
+  const [messagePopup, setMessagePopup] = useState('');
   const gateway = Gateway();
 
   useEffect(() => {
@@ -19,10 +22,15 @@ export const FavoriteButton: FC<FavoriteButtonProps> = ({ filmId }) => {
     }
     setIsFavorite(user.favorites.includes(filmId));
   }, [user]);
+
+  const activatePopup = (message: string) => {
+    setIsOpenPopup(true);
+    setMessagePopup(message);
+  };
   
   const onClickHandler = async () => {
     if (!user.login) {
-      alert('Only authorized users can set favorites! ');
+      activatePopup('Only authorized users can set favorites!');
       return;
     }
     let favorites = [...user.favorites];
@@ -37,13 +45,18 @@ export const FavoriteButton: FC<FavoriteButtonProps> = ({ filmId }) => {
       user.favorites = favorites;
       setUser({...user});
     } else {
-      alert('Some error occured')
+      activatePopup('Some error occured');
     }
   };
   
   return (
-    <Button isFavorite={isFavorite} 
-            onClick={onClickHandler} />
+    <>
+      <Button isFavorite={isFavorite} 
+              onClick={onClickHandler} />
+      <PopupMsg isOpen={isOpenPopup} 
+                closeModal={setIsOpenPopup} 
+                message={messagePopup} />
+    </>
   )
 }
 

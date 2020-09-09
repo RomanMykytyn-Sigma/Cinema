@@ -2,6 +2,7 @@ import React, { useState, FC, useContext } from 'react';
 import styled from 'styled-components';
 import Gateway from '../gateway';
 import { UserContext } from '../context';
+import { PopupMsg } from './PopupMsg';
 
 interface HeaderProps {
   
@@ -10,6 +11,8 @@ interface HeaderProps {
 export const Header: FC<HeaderProps> = ({  }) => {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
+  const [isOpenPopup, setIsOpenPopup] = useState(false);
+  const [messagePopup, setMessagePopup] = useState('');
   const { user, setUser } = useContext(UserContext);
   const userGateway = Gateway();
 
@@ -21,19 +24,21 @@ export const Header: FC<HeaderProps> = ({  }) => {
     }
   };
 
-  const logInNewHandler = async (e) => {
+  const activatePopup = (message: string) => {
+    setIsOpenPopup(true);
+    setMessagePopup(message);
+  };
+
+  const logInNewHandler = (e) => {
     if (!login || !password) {
-      alert('Login or(and) password is empty!\nPlease, enter theirs.');
+      activatePopup('Login or(and) password is empty!\nPlease, enter theirs.');
       return;
     }
     const alertMsg = e.target.value === 'Log In' ? 'Wrong login or(and) password!' 
                                                  : 'This login already exist!!!\nPlease, try another login.';
-    const data = await userGateway.createOrLoginUser(e.target.value, login, password);
-    if (!data.error) {
-      setUser(data.user);
-    } else{
-      alert(alertMsg);
-    }         
+   userGateway.createOrLoginUser(e.target.value, login, password)
+      .then(data => setUser(data.user))
+      .catch(() => activatePopup(alertMsg));
   }
 
   const logOutHandler = async () => {
@@ -57,6 +62,7 @@ export const Header: FC<HeaderProps> = ({  }) => {
               <Input type='password' onChange={onChangeHandler} placeholder='Password' />
               <Button type='button' value='Log In' onClick={logInNewHandler} />
               <Button type='button' value='New User' onClick={logInNewHandler} />
+              <PopupMsg isOpen={isOpenPopup} closeModal={setIsOpenPopup} message={messagePopup} />
             </div>
           : <div>
               <Button type='button' value='LogOut' onClick={logOutHandler} />

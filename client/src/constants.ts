@@ -7,4 +7,6 @@ export const API_PATH = {
   ADD_VOTE: '/films/addVote',
   FILM_BY_GENRES: '/films/filterByGenres',
   FILM_BY_FAVORITES: '/films/filterByFavorites',
+  ADD_COMMENT: '/comments/add',
+  GET_COMMENTS_BY_FILM: '/comments/getByFilm',
 }

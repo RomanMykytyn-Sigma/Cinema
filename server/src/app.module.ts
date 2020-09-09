@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { CommentsModule } from './comments/comments.module';
 import { Genre, GenreSchema } from './schemas/genre.schema';
 import { Film, FilmSchema } from './schemas/film.schema';
 import { User, UserSchema } from './schemas/user.schema';
@@ -25,6 +26,7 @@ dotenv.config();
     AuthModule,
     UsersModule,
     FilmsModule,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

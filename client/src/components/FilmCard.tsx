@@ -6,16 +6,18 @@ import { FavoriteButton } from './FavoriteButton';
 import { Film } from '../types';
 import Gateway from '../gateway';
 import { UserContext } from '../context';
-import { Link } from "react-router-dom";
+import { PlayButton } from './PlayButton';
+import { PopupMsg } from './PopupMsg';
 
 interface FilmCardProps {
   film: Film;
-  setActiveFilm: Function;
 }
 
-export const FilmCard: FC<FilmCardProps> = ({ film, setActiveFilm }) => {
+export const FilmCard: FC<FilmCardProps> = ({ film }) => {
   const { name, coverImage, description, director, duration, genre, reliseDate, rating, _id  } = film;
   const [averageRating, setAverageRating] = useState(getAverageRating(rating));
+  const [isOpenPopup, setIsOpenPopup] = useState(false);
+  const [messagePopup, setMessagePopup] = useState('');
   const { user } = useContext(UserContext);
   const relised = date.format(new Date(reliseDate), 'DD/MM/YYYY');
   const gateway = Gateway(); 
@@ -24,27 +26,28 @@ export const FilmCard: FC<FilmCardProps> = ({ film, setActiveFilm }) => {
     return listGrades.reduce((a, b) => a + b, 0) / listGrades.length;
   }
 
+  const activatePopup = (message: string) => {
+    setIsOpenPopup(true);
+    setMessagePopup(message);
+  };
+
   const changeRatingHandler = async (grade: number) => {
     if (!user.login) {
-      alert('Only authorized users can vote!');
+      activatePopup('Only authorized users can vote!');
       return;
     }
     if (user.ratedFilms.includes(_id)) {
-      alert("You've already voted for this movie!");
+      activatePopup("You've already voted for this movie!");
       return;
     }
     const response = await gateway.addVote(user.login, _id, grade);
     if (response.error) {
-      alert(response.error);
+      console.error(response.error);
       return;
     }
     rating.push(grade);
     user.ratedFilms.push(_id);
     setAverageRating(getAverageRating(rating));
-  };
-
-  const clickHandler = () => {
-    setActiveFilm(film);
   };
   
   return (
@@ -58,17 +61,18 @@ export const FilmCard: FC<FilmCardProps> = ({ film, setActiveFilm }) => {
                     changeRating={changeRatingHandler}
                     starRatedColor='yellow'
                     starHoverColor='yellow' />
+        <PopupMsg isOpen={isOpenPopup} 
+                  closeModal={setIsOpenPopup} 
+                  message={messagePopup} />
       </Chapter>
       
       <LeftSide>
-        <Image width='175' 
+        <img width='175' 
                height='275' 
                src={coverImage} />
-        <Link to='/watch'>
-          <PlayButton type='button' 
-                      value='Play'
-                      onClick={clickHandler} />
-        </Link>
+        <PlayButton filmId={_id}
+                    videoSource={film.videoSource} />
+        
         <FavoriteButton filmId={_id} />
       </LeftSide>
 
@@ -84,7 +88,7 @@ export const FilmCard: FC<FilmCardProps> = ({ film, setActiveFilm }) => {
 }
 
 const Wrapper = styled.div`
-  margin-top: 40px;
+  margin-bottom: 40px;
   width: 600px;
   min-height: 400px;
   display: grid;
@@ -123,21 +127,5 @@ const LeftSide = styled.div`
 const RightSide = styled.div`
   font-size: 18px;
   font-family: Arial, serif;
-  
 `;
 
-
-const Image = styled.img`
-
-`;
-
-const PlayButton = styled.input`
-  background-color: #fc8000;
-  border: 2px solid #f7dfc6;
-  font-size: 20px;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
-  width: 100px;
-  height: 30px;
-`;

@@ -1,4 +1,5 @@
-import { API_PATH } from './constants'
+import { API_PATH } from './constants';
+import { Comment } from './types'
 
 export default function Gateway() {
 
@@ -57,6 +58,22 @@ export default function Gateway() {
     })
     .then(toJson).catch(err => alert(err));
   }
+
+  function addComment(comment: Comment) {
+    return fetch(API_PATH.ADD_COMMENT, {method: 'POST',
+                                        headers: {'Content-Type': 'application/json'},
+                                        body: JSON.stringify(comment)
+    })
+    .then(toJson).catch(err => alert(err));
+  }
+
+  function getCommentsByFilm(filmId: string) {
+    return fetch(API_PATH.GET_COMMENTS_BY_FILM, {method: 'POST',
+                                                 headers: {'Content-Type': 'application/json'},
+                                                 body: JSON.stringify({filmId})
+    })
+    .then(toJson).catch(err => alert(err));
+  }
   
   return  Object.freeze({
     setFavorites,
@@ -66,5 +83,7 @@ export default function Gateway() {
     addVote,
     getFilmsByGenres,
     getFilmsByFavorites,
+    addComment,
+    getCommentsByFilm,
   });
 }

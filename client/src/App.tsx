@@ -2,21 +2,21 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Header } from './components/Header';
 import { FilmCard } from './components/FilmCard';
+import { CommentsBox } from './components/CommentsBox';
 import { GenreButton } from './components/GenreButton';
+import { Player } from './components/Player';
 import Gateway from './gateway';
 import styled from 'styled-components';
 import { UserContext } from './context'
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import YouTube from 'react-youtube';
 
 const App: React = () => {
   const [user, setUser] = useState({});
-  const [activeFilm, setActiveFilm] = useState({});
   const [listGenres, setListGenres] = useState([]);
   const [listFilms, setListFilms] = useState([]);
   const [genreFilter, setGenreFilter] = useState([]);
   const gateway = Gateway();
-
+  
   useEffect(() => {
     const fetchApi = async () => {
       const data = await gateway.getData(); 
@@ -83,12 +83,14 @@ const App: React = () => {
             <Switch>
               <Route path='/' exact>
                 { listFilms.map(el => 
-                    <FilmCard key={el._id} film={el} setActiveFilm={setActiveFilm} />
+                    <FilmCard key={el._id} 
+                              film={el} />
                   )
                 }
               </Route>
-              <Route path='/watch' exact>
-                <YouTube videoId={activeFilm.videoSource} opts={{height: '480', width: '720'}} onReady={this._onReady} />;
+              <Route path='/watch/:filmId/:videoSource'>
+                <Player />
+                <CommentsBox />
               </Route>
             </Switch>
           </MainField>
@@ -113,6 +115,7 @@ const MainField = styled.div`
   flex-direction: column;
   align-items: center;
   width: calc(100% - 300px);
+  padding-top: 40px;
 `;
 
 const FlexWrapper = styled.div`
